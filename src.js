@@ -65,11 +65,7 @@ function downloadReminder(){const w=windowNow(),start=state.variant==='3'?w.star
 function renderPrayer(){
  const isEdot=state.nusach==='edot',parts=isEdot?edot:nusach;
  $('#prayer').innerHTML=parts.map(p=>`<p class="${p.type}">${esc(p.text)}</p>`).join('');
- if(!isEdot){
-   const last=$('#prayer p:last-child');
-   last.insertAdjacentHTML('afterend',`<div class="song-option" dir="ltr"><button type="button" id="play-tovim" aria-expanded="false">${state.lang==='he'?'השמעת ניגון טובים מאורות ▶':'Play טובים מאורות song ▶'}</button><p class="song-credit">${state.lang==='he'?'ניגון באבוב · דרך YouTube, ללא הורדה':'Bobov melody · plays through YouTube, not downloaded'}</p><div id="song-player" class="song-player" hidden></div></div>`);
-   $('#play-tovim').onclick=()=>{const player=$('#song-player'),button=$('#play-tovim');if(player.hidden){player.innerHTML='<iframe src="https://www.youtube.com/embed/-ke2BZiNRgg?rel=0" title="Tovim Meoros - Kedushas Zion of Bobov" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen referrerpolicy="strict-origin-when-cross-origin"></iframe>';player.hidden=false;button.setAttribute('aria-expanded','true');button.textContent=state.lang==='he'?'סגירת הניגון ■':'Close player ■'}else{player.innerHTML='';player.hidden=true;button.setAttribute('aria-expanded','false');button.textContent=state.lang==='he'?'השמעת ניגון טובים מאורות ▶':'Play טובים מאורות song ▶'}};
- }
+
 
  $('#prayer-source').innerHTML=isEdot?`<a href="https://www.sefaria.org/Siddur_Edot_HaMizrach%2C_Blessing_of_the_Moon" target="_blank" rel="noopener">${state.lang==='he'?'מקור הנוסח: סידור עדות המזרח בספריא':'Source: Sefaria, Siddur Edot HaMizrach'}</a>. ${state.lang==='he'?'מנהגים מקומיים עשויים להשתנות. בדקו בסידור שלכם. קדיש נאמר במניין בלבד.':'Local customs vary. Check your siddur. Kaddish requires a minyan.'}`:`<a href="https://he.wikisource.org/wiki/%D7%A7%D7%99%D7%93%D7%95%D7%A9_%D7%9C%D7%91%D7%A0%D7%94" target="_blank" rel="noopener">${state.lang==='he'?'מקור הנוסח: ויקיטקסט':'Source: Wikisource Ashkenaz siddur'}</a>. ${state.lang==='he'?'נכללים גם קטעי הסיום; תוספות ומנהגים שונים לפי קהילה. קדיש נאמר במניין בלבד.':'Concluding passages included; additions vary by community. Kaddish requires a minyan.'}`;
 }
