@@ -20,3 +20,5 @@
 /* Put moonrise on the same visual footing as the sky direction. */
 .moonrise-highlight{margin:12px 0 16px;padding:13px 14px;border-radius:10px;background:#ecdfc4;color:#4f341c;font-size:15px;font-weight:700;line-height:1.5;border:1px solid #d6bd88}
 body.night-red .moonrise-highlight{background:#21090b;color:#f0aaa1;border-color:#713c3c}
+/* Keep the full phone-number hint visible on narrow screens. */
+@media(max-width:740px){.greeting .coord{display:grid;grid-template-columns:minmax(0,1fr);gap:9px}.greeting .coord input{width:100%;min-width:0;min-height:46px;font-size:14px;padding:10px 12px}.greeting .coord button{justify-self:start;min-height:44px}.greeting .contact-note{overflow-wrap:anywhere}}
