@@ -12,3 +12,4 @@
 
 /* David's selected prayer scene, integrated into the app header. */
 .brand-art{display:block;width:112px;height:82px;flex:none;object-fit:cover;border:0;border-radius:0;box-shadow:none;background:transparent}.brand{min-width:0;gap:7px}.brand h1{white-space:nowrap}@media(max-width:740px){.brand-art{width:77px;height:60px}.brand{gap:5px}.brand h1{font-size:19px}}@media(max-width:420px){header{gap:8px}.header-controls{justify-content:flex-end}.brand h1{font-size:16px}.brand-art{width:64px;height:51px}}
+@media(max-width:740px){header{flex-wrap:wrap;align-items:center;row-gap:4px}.brand{flex:1 1 100%;min-width:0}.header-controls{width:100%;justify-content:flex-end}html[dir=rtl] .header-controls{justify-content:flex-start}}
