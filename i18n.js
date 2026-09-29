@@ -48,3 +48,4 @@ Object.assign(translations,{
 'No suggested spaces yet. Use your location to search.':'אין הצעות עדיין. השתמשו במיקום כדי לחפש.'
 });
 Object.assign(translations,{'Checking here and nearby streets…':'בודקים כאן וברחובות הסמוכים…','Outside only · check the actual sky':'מחוץ למבנה בלבד · בדקו את השמים בפועל','Right here, outside':'כאן, מחוץ לבית','Nearby street':'רחוב קרוב','street':'רחוב','current position':'המיקום הנוכחי'});
+Object.assign(translations,{'Map data © ':'נתוני מפה © ','Coming up':'עוד לא התחיל'});
