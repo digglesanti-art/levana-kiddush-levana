@@ -46,7 +46,7 @@ async function enableHeading(){const note=$('#compass-note');if(state.compassLis
  }catch{note.textContent=state.lang==='he'?'חיישן כיוון אינו זמין או שהרשות נדחתה. השתמשו בכיוון ביחס לצפון.':'Heading sensor unavailable or denied. Use the north-based bearing.'}
 }
 function renderAlert(){const b=$('#good-night-alert'),n=$('#alert-note');if(!b)return;const he=state.lang==='he';b.textContent=state.alertEnabled?(he?'כיבוי בדיקת הערב':'Turn off tonight check'):(he?'הפעלת בדיקת הערב':'Enable tonight check');b.setAttribute('aria-pressed',String(state.alertEnabled));
- n.textContent=state.alertEnabled?(he?'פעיל רק כשהאפליקציה פתוחה והמכשיר מחובר. בדיקה לכל היותר פעם בשעה; אין התראות רקע או Push.':'Only while this app is open and online. Checks at most hourly. No background alerts or push.'):(he?'בחרו מיקום ואז הפעילו. התרעה רק באפליקציה פתוחה, כשהתחזית והזמן המחושב מתאימים; לא הבטחה לראייה.':'Choose a location and enable. Alerts only while the app is open when the forecast and calculated window fit; not a visibility guarantee.');
+ n.textContent=state.alertEnabled?(he?'פעיל רק כשהאפליקציה פתוחה והמכשיר מחובר. בדיקה לכל היותר פעם בשעה; אין התראות רקע או Push.':'Only while this app is open and online. Checks at most hourly. No background alerts or push.'):(he?'בחרו מיקום ואז הפעילו. התרעה רק באפליקציה פתוחה, כשהתחזית והזמן המחושב מתאימים; לא הבטחה לראייה.':'Choose a location, then enable. Alerts only while the app is open, when the forecast and calculated window fit; not a visibility guarantee.');
 }
 async function toggleGoodNight(){if(state.alertEnabled){state.alertEnabled=false;localStorage.removeItem('levana-alert');renderAlert();return}
  if(!state.coords){$('#alert-note').textContent=state.lang==='he'?'בחרו מיקום תחילה.':'Choose a location first.';return}
@@ -54,7 +54,7 @@ async function toggleGoodNight(){if(state.alertEnabled){state.alertEnabled=false
  if('Notification' in window&&'serviceWorker' in navigator&&Notification.permission==='default'){try{await Notification.requestPermission()}catch{}}
  checkGoodNight();
 }
-async function checkGoodNight(){if(!state.alertEnabled||!state.coords||!state.forecast||state.forecast.error||state.forecast.noMoon||!state.locationTimezone)return;
+async function checkGoodNight(){if(!state.alertEnabled||!state.coords||!state.forecast||state.forecast.error||state.forecast.noMoon||!state.locationTimezone||Date.now()-state.lastForecastAt>75*60000)return;
  const f=state.forecast,now=new Date(),w=windowNow(),start=state.variant==='3'?w.start3:w.start7;if(now<start||now>w.end||f.cloud>=35||f.rain>=30)return;const {lat,lon}=state.coords;if(SunCalc.getPosition(now,lat,lon).altitude>=-6||SunCalc.getMoonPosition(now,lat,lon).altitude<=5)return;
  const key=`${state.coords.lat.toFixed(3)},${state.coords.lon.toFixed(3)}:${localDay(now,state.locationTimezone)}`;
  if(localStorage.getItem('levana-alert-last')===key)return;
