@@ -11,7 +11,9 @@ async function paths(dir='dist',relative=''){
  return out;
 }
 const assets=['/',...await paths()];
-const version=createHash('sha256').update(JSON.stringify(assets)).update(await readFile('dist/manifest.webmanifest')).digest('hex').slice(0,12);
+const hash=createHash('sha256').update(JSON.stringify(assets));
+for(const asset of assets.filter(p=>p!=='/')) hash.update(await readFile(join('dist',asset.slice(1))));
+const version=hash.digest('hex').slice(0,12);
 const code=`const CACHE='levana-${version}';const ASSETS=${JSON.stringify(assets)};
 self.addEventListener('install',e=>e.waitUntil(caches.open(CACHE).then(c=>c.addAll(ASSETS)).then(()=>self.skipWaiting())));
 self.addEventListener('activate',e=>e.waitUntil(Promise.all([caches.keys().then(names=>Promise.all(names.filter(n=>n.startsWith('levana-')&&n!==CACHE).map(n=>caches.delete(n)))),self.clients.claim()])));
