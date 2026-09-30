@@ -1,1 +1,63 @@
-{"name":"קידוש לבנה","short_name":"קידוש לבנה","start_url":"/","display":"standalone","background_color":"#f7f0e1","theme_color":"#795c31","icons":[{"src":"/1-prayer-icon-192-v2.png","sizes":"192x192","type":"image/png","purpose":"any maskable"},{"src":"/2-prayer-icon-512-v2.png","sizes":"512x512","type":"image/png","purpose":"any maskable"}]}
+{
+  "name": "קידוש לבנה",
+  "short_name": "קידוש לבנה",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f7f0e1",
+  "theme_color": "#795c31",
+  "icons": [
+    {
+      "src": "/1-prayer-icon-192-v2.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/2-prayer-icon-512-v2.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Read נוסח",
+      "short_name": "נוסח",
+      "description": "Open the Kiddush Levana prayer",
+      "url": "/#nusach",
+      "icons": [
+        {
+          "src": "/1-prayer-icon-192-v2.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
+    },
+    {
+      "name": "Kiddush Levana times",
+      "short_name": "Times",
+      "description": "View the calculated blessing window",
+      "url": "/#month",
+      "icons": [
+        {
+          "src": "/1-prayer-icon-192-v2.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
+    },
+    {
+      "name": "Find the moon",
+      "short_name": "Moon",
+      "description": "Open moon direction, moonrise and location tools",
+      "url": "/#sky",
+      "icons": [
+        {
+          "src": "/1-prayer-icon-192-v2.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
+    }
+  ]
+}
