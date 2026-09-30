@@ -37,3 +37,5 @@ body.night-red .app-tabs{background:#180506;border-color:#713c3c}body.night-red 
 @media(max-width:420px){.app-tabs{gap:4px}.app-tabs a{font-size:12px;padding:8px 2px}.reading-tools{gap:8px}}
 
 main .app-tabs a[aria-current="page"]{color:#fff!important}
+
+.app-tabs a[hidden],.tool-directory a[hidden]{display:none!important}
