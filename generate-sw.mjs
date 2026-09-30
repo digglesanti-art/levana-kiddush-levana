@@ -1,4 +1,4 @@
-import {readdir,writeFile} from 'node:fs/promises';
+import {readdir,writeFile,readFile} from 'node:fs/promises';
 import {join} from 'node:path';
 import {createHash} from 'node:crypto';
 async function paths(dir='dist',relative=''){
@@ -11,11 +11,12 @@ async function paths(dir='dist',relative=''){
  return out;
 }
 const assets=['/',...await paths()];
-const version=createHash('sha256').update(JSON.stringify(assets)).digest('hex').slice(0,12);
+const version=createHash('sha256').update(JSON.stringify(assets)).update(await readFile('dist/manifest.webmanifest')).digest('hex').slice(0,12);
 const code=`const CACHE='levana-${version}';const ASSETS=${JSON.stringify(assets)};
 self.addEventListener('install',e=>e.waitUntil(caches.open(CACHE).then(c=>c.addAll(ASSETS)).then(()=>self.skipWaiting())));
 self.addEventListener('activate',e=>e.waitUntil(Promise.all([caches.keys().then(names=>Promise.all(names.filter(n=>n.startsWith('levana-')&&n!==CACHE).map(n=>caches.delete(n)))),self.clients.claim()])));
 self.addEventListener('fetch',e=>{const u=new URL(e.request.url);if(e.request.method!=='GET'||u.origin!==self.location.origin)return;
+ if(u.pathname==='/manifest.webmanifest'){e.respondWith(fetch(e.request).then(r=>{if(r.ok){const copy=r.clone();caches.open(CACHE).then(c=>c.put(e.request,copy))}return r}).catch(()=>caches.match(e.request)));return}
  if(e.request.mode==='navigate'){e.respondWith(fetch(e.request).then(r=>{if(r.ok){const copy=r.clone();caches.open(CACHE).then(c=>c.put('/',copy))}return r}).catch(()=>caches.match('/')));return}
  e.respondWith(caches.match(e.request).then(hit=>hit||fetch(e.request)))});
 self.addEventListener('notificationclick',e=>{e.notification.close();e.waitUntil(self.clients.matchAll({type:'window',includeUncontrolled:true}).then(async clients=>{for(const c of clients)if(c.url.startsWith(self.location.origin)){await c.focus();return}return self.clients.openWindow('/') }))});`;
