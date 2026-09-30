@@ -22,3 +22,16 @@
 body.night-red .moonrise-highlight{background:#21090b;color:#f0aaa1;border-color:#713c3c}
 /* Keep the full phone-number hint visible on narrow screens. */
 @media(max-width:740px){.greeting .coord{display:grid;grid-template-columns:minmax(0,1fr);gap:9px}.greeting .coord input{width:100%;min-width:0;min-height:46px;font-size:14px;padding:10px 12px}.greeting .coord button{justify-self:start;min-height:44px}.greeting .contact-note{overflow-wrap:anywhere}}
+
+/* Separate task screens, retaining the warm original app identity. */
+.app-view[hidden],.hero[hidden]{display:none!important}
+.app-tabs{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px;position:sticky;top:0;z-index:20;background:#f7f0e1;padding:10px 0;margin-bottom:18px;border-bottom:1px solid #d8c8aa}
+.app-tabs a{display:flex;align-items:center;justify-content:center;text-align:center;min-height:46px;border:1px solid #cdb891;border-radius:10px;padding:8px 4px;font-size:14px;color:#62451e;text-decoration:none;background:#fbf6ec}
+.app-tabs a[aria-current=page]{background:#795c31;color:#fff;font-weight:700}
+.app-view{margin-bottom:24px}.app-view .join{margin:24px 0 0}
+.reading-tools{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin:14px 0}.reading-tools button{min-width:48px;min-height:44px}.reading-tools button:disabled{opacity:.4}
+.reading #prayer p{font-size:var(--reading-size,26px)}
+.completion-control{border-top:1px solid #dfd0b6;border-bottom:1px solid #dfd0b6;padding:14px 0;margin:14px 0}.completion-control button{max-width:100%;white-space:normal}.completion-control button[aria-pressed=true]{background:#4b6145}
+.tool-directory{display:grid;gap:10px;margin:18px 0}.tool-directory a{padding:14px;border:1px solid #d8c8aa;border-radius:10px;color:#62451e;text-decoration:none}.app-more details p{font-size:15px;line-height:1.7}
+body.night-red .app-tabs{background:#180506;border-color:#713c3c}body.night-red .app-tabs a{background:#21090b;color:#f0aaa1;border-color:#713c3c}body.night-red .app-tabs a[aria-current=page]{background:#713c3c;color:#fff}body.night-red .tool-directory a{color:#f0aaa1;border-color:#713c3c}
+@media(max-width:420px){.app-tabs{gap:4px}.app-tabs a{font-size:12px;padding:8px 2px}.reading-tools{gap:8px}}
