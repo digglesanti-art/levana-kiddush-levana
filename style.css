@@ -39,3 +39,5 @@ body.night-red .app-tabs{background:#180506;border-color:#713c3c}body.night-red 
 main .app-tabs a[aria-current="page"]{color:#fff!important}
 
 .app-tabs a[hidden],.tool-directory a[hidden]{display:none!important}
+
+main nav.app-tabs{display:grid!important}button:disabled{opacity:.55;cursor:not-allowed}.contact-actions button[data-remove]{font-size:13px;min-height:44px;padding:8px 12px}
