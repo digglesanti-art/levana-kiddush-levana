@@ -35,3 +35,5 @@ body.night-red .moonrise-highlight{background:#21090b;color:#f0aaa1;border-color
 .tool-directory{display:grid;gap:10px;margin:18px 0}.tool-directory a{padding:14px;border:1px solid #d8c8aa;border-radius:10px;color:#62451e;text-decoration:none}.app-more details p{font-size:15px;line-height:1.7}
 body.night-red .app-tabs{background:#180506;border-color:#713c3c}body.night-red .app-tabs a{background:#21090b;color:#f0aaa1;border-color:#713c3c}body.night-red .app-tabs a[aria-current=page]{background:#713c3c;color:#fff}body.night-red .tool-directory a{color:#f0aaa1;border-color:#713c3c}
 @media(max-width:420px){.app-tabs{gap:4px}.app-tabs a{font-size:12px;padding:8px 2px}.reading-tools{gap:8px}}
+
+main .app-tabs a[aria-current="page"]{color:#fff!important}
