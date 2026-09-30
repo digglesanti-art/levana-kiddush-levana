@@ -16,7 +16,7 @@ function hebrewDateAt(d){
  if(state.coords){const {lat,lon}=state.coords;const civilKey=z=>new Intl.DateTimeFormat('en-CA',{timeZone:zone,year:'numeric',month:'2-digit',day:'2-digit'}).format(z);const key=civilKey(d);const noon=Date.UTC(y,m-1,day,12);for(const shift of [-1,0,1]){const sunset=SunCalc.getTimes(new Date(noon+shift*86400000),lat,lon).sunset;if(Number.isFinite(sunset?.getTime())&&civilKey(sunset)===key){if(d>=sunset)h=h.next();break}}}
  return h;
 }
-function hebrewDateText(d){return hebrewDateAt(d).renderGematriya()}
+function hebrewDateText(d){return hebrewDateAt(d).renderGematriya().replace(/[\u0591-\u05BD\u05BF\u05C1\u05C2\u05C4\u05C5\u05C7]/g,'')}
 function renderDatePair(el,d){el.textContent=fmt(d);const span=document.createElement('span');span.dir='rtl';span.lang='he';span.style.cssText='display:block;margin-top:8px;font-size:15px;line-height:1.5';span.textContent=hebrewDateText(d);el.append(span)}
 const toDate=z=>new Date(z.epochMilliseconds);
 function windowFor(date){const h=new HDate(date),m=new Molad(h.getFullYear(),h.getMonth());return {name:h.getMonthName(),start3:toDate(m.getTchilasZmanKidushLevana3Days()),start7:toDate(m.getTchilasZmanKidushLevana7Days()),end:toDate(m.getSofZmanKidushLevanaBetweenMoldos()),end15:toDate(m.getSofZmanKidushLevana15Days())}}
