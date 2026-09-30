@@ -41,3 +41,9 @@ main .app-tabs a[aria-current="page"]{color:#fff!important}
 .app-tabs a[hidden],.tool-directory a[hidden]{display:none!important}
 
 main nav.app-tabs{display:grid!important}button:disabled{opacity:.55;cursor:not-allowed}.contact-actions button[data-remove]{font-size:13px;min-height:44px;padding:8px 12px}
+/* Keep every top option on one level and remove the asymmetric nav panel. */
+main nav.app-tabs{align-items:stretch;gap:6px;background:transparent;padding:10px 0;border:0;box-shadow:none}
+main nav.app-tabs a{height:46px;min-height:46px;box-sizing:border-box;margin:0;line-height:1.2;align-self:stretch;display:flex;align-items:center;justify-content:center;white-space:nowrap}
+.brand-art{object-fit:cover;object-position:center;overflow:hidden;clip-path:inset(1px);background:transparent}
+@media(max-width:740px){header .brand{width:100%;justify-content:center}header .header-controls{width:100%;justify-content:center;align-items:center}main nav.app-tabs{gap:5px}main nav.app-tabs a{font-size:12px;padding:8px 2px}}
+@media(max-width:350px){main nav.app-tabs{gap:4px}main nav.app-tabs a{font-size:11px}}
