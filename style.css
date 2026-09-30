@@ -47,3 +47,6 @@ main nav.app-tabs a{height:46px;min-height:46px;box-sizing:border-box;margin:0;l
 .brand-art{object-fit:cover;object-position:center;overflow:hidden;clip-path:inset(1px);background:transparent}
 @media(max-width:740px){header .brand{width:100%;justify-content:center}header .header-controls{width:100%;justify-content:center;align-items:center}main nav.app-tabs{gap:5px}main nav.app-tabs a{font-size:12px;padding:8px 2px}}
 @media(max-width:350px){main nav.app-tabs{gap:4px}main nav.app-tabs a{font-size:11px}}
+/* An opaque sticky strip keeps prayer text from showing behind the tabs. */
+main nav.app-tabs{background:#f7f0e1}
+body.night-red main nav.app-tabs{background:#180506}
