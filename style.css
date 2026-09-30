@@ -50,9 +50,9 @@ main nav.app-tabs a{height:46px;min-height:46px;box-sizing:border-box;margin:0;l
 /* An opaque sticky strip keeps prayer text from showing behind the tabs. */
 main nav.app-tabs{background:#f7f0e1}
 body.night-red main nav.app-tabs{background:#180506}
-/* Use one surface behind the header and sticky navigation, without a pale patch. */
-body{background:#f7f0e1}
-main nav.app-tabs{background:#f7f0e1;border:0;border-radius:0;box-shadow:none;transform:none;align-items:stretch}
-main nav.app-tabs a{height:46px;min-height:46px;margin:0;transform:none;box-sizing:border-box;border-width:1px;align-self:stretch}
-header .brand-art{clip-path:none;object-fit:cover;object-position:center;outline:0;border:0;box-shadow:none}
-@media(max-width:740px){header .header-controls{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;align-items:stretch}header .header-controls button{margin:0;min-width:0;min-height:44px;white-space:normal;padding:8px 4px;font-size:12px}header .header-controls .flash-notice,header .header-controls .headerlink{grid-column:1/-1;text-align:center}header .header-controls .flash-notice:empty{display:none}}
+/* A compact, aligned label and selector rather than a loose inline box. */
+.practice-control{display:flex;flex-direction:column;align-items:flex-start;gap:7px;margin:18px 0 0;max-width:230px}
+.practice-control label{display:block;margin:0;font-size:12px;line-height:1.4}
+.practice-control #variant{display:block;width:100%;height:44px;min-height:44px;margin:0;padding:8px 10px;box-sizing:border-box;font-size:14px;line-height:1.2;border-radius:8px;text-align:start}
+html[dir=rtl] .practice-control{align-items:flex-start}
+@media(max-width:740px){.practice-control{max-width:210px}.practice-control #variant{font-size:16px}}
