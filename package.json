@@ -10,6 +10,10 @@
   },
   "dependencies": {
     "@hebcal/core": "^6.11.0",
+    "@mapbox/vector-tile": "^3.0.0",
+    "@vercel/blob": "^2.0.0",
+    "maplibre-gl": "^6.11.2",
+    "pbf": "^4.0.1",
     "suncalc": "^2.0.2"
   },
   "devDependencies": {
