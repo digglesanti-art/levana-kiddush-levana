@@ -196,8 +196,8 @@ init();
 if('serviceWorker' in navigator){
  let announced=false;
  const offerUpdate=()=>{if(announced)return;announced=true;const box=document.createElement('div');box.id='app-update';box.setAttribute('role','status');box.style.cssText='position:fixed;bottom:16px;left:16px;right:16px;z-index:1000;padding:16px;border:1px solid #b99d67;border-radius:12px;background:#fff8e9;color:#382719;box-shadow:0 4px 20px #0003';const text=document.createElement('span');text.textContent=say('An app update is ready. ','עדכון לאפליקציה מוכן. ');const button=document.createElement('button');button.type='button';button.textContent=say('Reload app','טעינת העדכון');button.onclick=()=>{sessionStorage.setItem('levana-update-view',JSON.stringify({coords:state.coords,time:$('#view-time')?.value||''}));location.reload()};box.append(text,button);document.body.append(box)};
- const wasControlled=!!navigator.serviceWorker.controller;
- navigator.serviceWorker.addEventListener('controllerchange',()=>{if(wasControlled)offerUpdate()});
+ let wasControlled=!!navigator.serviceWorker.controller;
+ navigator.serviceWorker.addEventListener('controllerchange',()=>{if(wasControlled)offerUpdate();wasControlled=!!navigator.serviceWorker.controller});
  navigator.serviceWorker.register('/sw.js',{updateViaCache:'none'}).then(reg=>{if(reg.waiting&&wasControlled)offerUpdate();reg.addEventListener('updatefound',()=>{const worker=reg.installing;worker?.addEventListener('statechange',()=>{if(worker.state==='installed'&&wasControlled)offerUpdate()})});reg.update().catch(()=>{});document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&navigator.onLine)reg.update().catch(()=>{})})}).catch(()=>{});
 }
 try{const raw=sessionStorage.getItem('levana-update-view');if(raw){sessionStorage.removeItem('levana-update-view');const saved=JSON.parse(raw);if(Number.isFinite(saved.coords?.lat)&&Number.isFinite(saved.coords?.lon)&&Math.abs(saved.coords.lat)<=90&&Math.abs(saved.coords.lon)<=180){state.coords=saved.coords;init();$('#view-time').value=saved.time||'';findPlaces()}}}catch{}
