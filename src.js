@@ -210,8 +210,88 @@ function setupViews(){
  $('#reading-smaller').onclick=()=>resize(-2);$('#reading-larger').onclick=()=>resize(2);resize();
  $('.hero').hidden=true;
  function show(){let id=location.hash.slice(1);id=({month:'times',sky:'moon',more:'times'})[id]||id;if(id==='greetings'&&state.nusach!=='ashkenaz')id='nusach';if(!views.some(v=>v.id===id))id='times';for(const view of views)view.hidden=view.id!==id;if(id==='moon'&&buildingMap)requestAnimationFrame(()=>buildingMap?.resize());nav.querySelectorAll('a').forEach(a=>{if(a.dataset.view===id)a.setAttribute('aria-current','page');else a.removeAttribute('aria-current')});window.scrollTo({top:0,behavior:'instant'})}
- window.onhashchange=show;applyNusachAccess();show();
+ window.onhashchange=show;applyNusachAccess();show();setupNewFeatures();
 }
+
+
+// === Round: read-aloud, camera aim, illumination, manual line-of-sight ===
+const PHASES=[['New moon','מולד'],['Waxing crescent','סהר מתמלא'],['First quarter','רבע ראשון'],['Waxing gibbous','לבנה מתמלאת'],['Full moon','לבנה מלאה'],['Waning gibbous','לבנה מתרוקנת'],['Last quarter','רבע אחרון'],['Waning crescent','סהר מתרוקן']];
+function moonPhaseName(){const p=SunCalc.getMoonIllumination(new Date());const i=Math.min(7,Math.floor(((p.phase+1/16)%1)*8));return PHASES[i]}
+function renderIllumination(){const el=$('#moon-illum');if(!el)return;const il=SunCalc.getMoonIllumination(new Date()),pct=Math.round(il.fraction*100),[en,he]=moonPhaseName();el.textContent=state.lang==='he'?`🌙 הארת הלבנה כעת: ${pct}% · ${he}`:`🌙 Moon illumination now: ${pct}% · ${en}`}
+
+let readParts=null,readIdx=0,readActive=false;
+function updateReadBtn(){const b=$('#read-aloud');if(b)b.textContent=readActive?say('■ Stop','■ עצירה'):say('▶ Listen','▶ האזנה')}
+function highlightReading(i){document.querySelectorAll('#prayer p').forEach((p,j)=>p.classList.toggle('reading-now',j===i));if(i>=0){const p=document.querySelectorAll('#prayer p')[i];if(p)p.scrollIntoView({block:'center',behavior:'smooth'})}}
+function stopReading(){if(!readActive)return;readActive=false;readParts=null;try{speechSynthesis.cancel()}catch{}highlightReading(-1);updateReadBtn()}
+function speakNext(){if(!readActive||!readParts)return;if(readIdx>=readParts.length){stopReading();return}const u=new SpeechSynthesisUtterance(readParts[readIdx]);u.lang='he-IL';u.rate=.95;const v=speechSynthesis.getVoices().find(v=>v.lang&&v.lang.toLowerCase().startsWith('he'));if(v)u.voice=v;const cur=readIdx;u.onend=()=>{if(readActive&&readIdx===cur){readIdx++;highlightReading(readIdx);speakNext()}};u.onerror=u.onend;speechSynthesis.speak(u)}
+function startReading(){if(!('speechSynthesis' in window))return;stopReading();readActive=true;readIdx=0;readParts=(state.nusach==='edot'?edot:nusach).map(p=>p.text).filter(t=>t&&t.trim());if(!readParts.length){readActive=false;return}highlightReading(0);updateReadBtn();speakNext()}
+
+let ar=null;
+function arNote(t){const n=$('#ar-note');if(n)n.textContent=t}
+async function openAim(){
+ if(ar)return;
+ const he=state.lang==='he';
+ if(!state.coords){arNote(say('Find your location first, then aim.','קודם מצאו את המיקום, ואז כוונו.'));return}
+ if(!navigator.mediaDevices?.getUserMedia){arNote(say('The camera is not available in this browser.','המצלמה אינה זמינה בדפדפן זה.'));return}
+ try{if(typeof DeviceOrientationEvent!=='undefined'&&typeof DeviceOrientationEvent.requestPermission==='function'){const r=await DeviceOrientationEvent.requestPermission();if(r!=='granted'){arNote(say('Motion sensors were not allowed, so aiming cannot work. Allow motion access and try again.','חיישני התנועה לא אושרו, לכן הכוונון אינו אפשרי. אשרו גישה לחיישנים ונסו שוב.'));return}}}catch{arNote(say('Motion sensors were not allowed, so aiming cannot work.','חיישני התנועה לא אושרו, לכן הכוונון אינו אפשרי.'));return}
+ let stream;try{stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:'environment'},audio:false})}catch{arNote(say('The camera is unavailable or blocked. Allow camera access and try again.','המצלמה אינה זמינה או חסומה. אשרו גישה למצלמה ונסו שוב.'));return}
+ const overlay=document.createElement('div');overlay.className='ar-overlay';
+ overlay.innerHTML=`<video autoplay playsinline muted></video><div class="ar-hud"><b id="ar-read"></b><p id="ar-guide" style="margin:4px 0 0"></p><p style="margin:4px 0 0;font-size:12px;opacity:.85">${say('Aiming uses the phone compass, which can drift near metal. Always confirm with your eyes.','הכוונון משתמש במצפן הטלפון, העלול לסטות ליד מתכת. יש לוודא בעיניים.')}</p></div><div class="ar-marker" hidden>☾</div><button type="button" class="ar-close">${say('Close','סגירה')}</button>`;
+ document.body.append(overlay);document.body.style.overflow='hidden';
+ const video=overlay.querySelector('video');video.srcObject=stream;
+ const marker=overlay.querySelector('.ar-marker'),read=overlay.querySelector('#ar-read'),guide=overlay.querySelector('#ar-guide');
+ ar={stream,overlay,heading:null,pitch:null,lastOrient:0,raf:0};
+ ar.listener=e=>{let h=Number.isFinite(e.webkitCompassHeading)?e.webkitCompassHeading:(e.absolute&&Number.isFinite(e.alpha)?(360-e.alpha)%360:null);if(h!==null)ar.heading=h;if(Number.isFinite(e.beta))ar.pitch=e.beta;ar.lastOrient=Date.now()};
+ window.addEventListener('deviceorientationabsolute',ar.listener);window.addEventListener('deviceorientation',ar.listener);
+ overlay.querySelector('.ar-close').onclick=closeAim;
+ const FOV_H=55,FOV_V=70;
+ const wrap=a=>((a+540)%360)-180;
+ const loop=()=>{if(!ar)return;ar.raf=requestAnimationFrame(loop);
+  const w=innerWidth,h=innerHeight,m=SunCalc.getMoonPosition(new Date(),state.coords.lat,state.coords.lon),mAz=(m.azimuth+360)%360,mAlt=m.altitude;
+  read.textContent=say(`Moon: ${Math.round(mAlt)}° up, ${Math.round(mAz)}° from north`,`הלבנה: ${Math.round(mAlt)}° גובה, ${Math.round(mAz)}° מצפון`);
+  const ang=screen.orientation&&Number.isFinite(screen.orientation.angle)?screen.orientation.angle:(Number.isFinite(window.orientation)?window.orientation:0);
+  if(ang!==0&&ang!==180){marker.hidden=true;guide.textContent=say('Hold the phone upright (portrait).','החזיקו את הטלפון זקוף (לאורך).');return}
+  if(!ar.heading||ar.pitch===null||Date.now()-ar.lastOrient>4000){marker.hidden=true;guide.textContent=say('Waiting for the compass - move the phone slowly in a figure-8.','ממתינים למצפן - הזיזו את הטלפון לאט בצורת שמיניה.');return}
+  const camEl=(ang===0?ar.pitch-90:-90-ar.pitch);
+  const dx=wrap(mAz-ar.heading),dy=mAlt-camEl;
+  if(Math.abs(dx)<3&&Math.abs(dy)<3){marker.hidden=false;marker.classList.add('on');marker.style.left=w/2+'px';marker.style.top=h/2+'px';guide.textContent=say('On target - look for the moon ☾','בכיוון - חפשו את הלבנה ☾');return}
+  marker.classList.remove('on');
+  const inView=Math.abs(dx)<=FOV_H/2&&Math.abs(dy)<=FOV_V/2;
+  if(inView){marker.hidden=false;marker.style.left=w/2+dx/(FOV_H/2)*(w/2)*.9+'px';marker.style.top=h/2-dy/(FOV_V/2)*(h/2)*.85+'px';guide.textContent=say('The marker is on the moon’s direction.','הסמן מראה את כיוון הלבנה.')}
+  else{marker.hidden=true;const parts=[];if(Math.abs(dx)>FOV_H/2)parts.push(say(dx>0?`turn right ${Math.round(Math.abs(dx))}°`:`turn left ${Math.round(Math.abs(dx))}°`,dx>0?`פנו ימינה ${Math.round(Math.abs(dx))}°`:`פנו שמאלה ${Math.round(Math.abs(dx))}°`));if(Math.abs(dy)>FOV_V/2)parts.push(say(dy>0?`tilt up ${Math.round(Math.abs(dy))}°`:`tilt down ${Math.round(Math.abs(dy))}°`,dy>0?`הטו מעלה ${Math.round(Math.abs(dy))}°`:`הטו מטה ${Math.round(Math.abs(dy))}°`));guide.textContent=mAlt<=0?say('The moon is below the horizon right now.','הלבנה מתחת לאופק כרגע.'):say('The moon is out of frame - ','הלבנה מחוץ לפריים - ')+parts.join(say(' and ',' וגם '))}};
+ loop()}
+function closeAim(){if(!ar)return;cancelAnimationFrame(ar.raf);window.removeEventListener('deviceorientationabsolute',ar.listener);window.removeEventListener('deviceorientation',ar.listener);ar.stream.getTracks().forEach(t=>t.stop());ar.overlay.remove();ar=null;document.body.style.overflow=''}
+
+function checkLos(){const out=$('#los-result');if(!out)return;const he=state.lang==='he';
+ if(!state.coords){out.textContent=say('Choose your location first.','בחרו קודם מיקום.');return}
+ const d=Number($('#los-dist').value),h=Number($('#los-height').value);
+ if(!d||d<=0||!(h>=0)){out.textContent=say('Enter the distance and the height in meters.','הזינו מרחק וגובה במטרים.');return}
+ if(h<=1.6){out.textContent=say('Below your eye line - it cannot block the moon.','מתחת לגובה העיניים - לא יכול לחסום את הלבנה.');return}
+ const c=Math.atan((h-1.6)/d)*180/Math.PI,m=SunCalc.getMoonPosition(viewDate(),state.coords.lat,state.coords.lon),a=m.altitude,z=(m.azimuth+360)%360;
+ const when=viewDate(),timeStr=new Intl.DateTimeFormat(he?'he-IL':undefined,{dateStyle:'short',timeStyle:'short'}).format(when);
+ if(a<=0){out.textContent=say(`The moon is below the horizon at ${timeStr} - nothing to check.`,`הלבנה מתחת לאופק ב-${timeStr} - אין מה לבדוק.`);return}
+ const common=say(`the moon is at ${a.toFixed(1)}° high, bearing ${Math.round(z)}°, at ${timeStr}`,`הלבנה בגובה ${a.toFixed(1)}°, בכיוון ${Math.round(z)}°, ב-${timeStr}`);
+ out.textContent=a>c?say(`Clears it: its top rises ${c.toFixed(1)}° above your eye line; ${common}. It only matters if it stands toward that bearing.`,`לא חוסם: קודקודו ${c.toFixed(1)}° מעל קו העיניים; ${common}. זה חשוב רק אם הוא עומד בכיוון הזה.`):say(`Blocked if it stands toward bearing ${Math.round(z)}°: its top rises ${c.toFixed(1)}° above your eye line; ${common}.`,`חוסם אם הוא עומד בכיוון ${Math.round(z)}°: קודקודו ${c.toFixed(1)}° מעל קו העיניים; ${common}.`)}
+
+function setupNewFeatures(){
+ stopReading();
+ const he=state.lang==='he';
+ // illumination line under the moonrise note
+ const rise=$('#moonrise');
+ if(rise&&!$('#moon-illum'))rise.insertAdjacentHTML('afterend','<p id="moon-illum" class="moonrise-highlight" role="status"></p>');
+ renderIllumination();
+ // camera aim under the moon extras
+ const extras=$('.moon-extras');
+ if(extras&&!$('#ar-aim')){extras.insertAdjacentHTML('afterend',`<button id="ar-aim" class="primary" style="width:100%;margin-top:12px;font-size:16px;padding:14px">${say('Aim with the camera ☾','כוונון עם המצלמה ☾')}</button><p id="ar-note" class="muted" role="status"></p>`);$('#ar-aim').onclick=openAim}
+ // manual line-of-sight calculator in the moon card, before the weather details
+ const moonCard=$('#moon');
+ if(moonCard&&!$('#los-box')){const w=moonCard.querySelector('details');const box=document.createElement('details');box.id='los-box';box.innerHTML=`<summary>${say('Check an obstacle yourself','בדיקת חסימה עצמית')}</summary><p class="muted">${say('A building, tree or hill blocks the moon only if it stands toward the moon and rises above the moon’s height in the sky.','מבנה, עץ או גבעה חוסמים את הלבנה רק אם הם בכיוון הלבנה וגבוהים מגובהה בשמים.')}</p><div class="coord"><input id="los-dist" type="number" min="1" step="any" placeholder="${say('Distance to it (m)','מרחק אליו (מ׳)')}" aria-label="${say('Distance to obstacle in meters','מרחק אל החסימה במטרים')}"><input id="los-height" type="number" min="0" step="any" placeholder="${say('Its height (m)','גובהו (מ׳)')}" aria-label="${say('Obstacle height in meters','גובה החסימה במטרים')}"><button id="los-check" type="button">${say('Check','בדיקה')}</button></div><p id="los-result" role="status"></p><p class="muted">${say('Uses the moon position for the time chosen above (empty = now) at your location. Eye level counts as 1.6 m. Judge distance and height by eye or pace them out; the math is exact for the numbers you enter.','החישוב משתמש במיקום הלבנה לשעה שנבחרה למעלה (ריק = עכשיו). גובה העיניים נחשב 1.6 מ׳. אמדו מרחק וגובה בעין או בצעדים; החשבון מדויק עבור המספרים שיוזנו.')}</p>`;w?w.before(box):moonCard.append(box);$('#los-check').onclick=checkLos}
+ // read-aloud button in the prayer tools
+ const tools=$('.reading-tools');
+ if(tools&&!$('#read-aloud')){const b=document.createElement('button');b.id='read-aloud';b.type='button';if(!('speechSynthesis' in window)){b.disabled=true;b.textContent=say('Read-aloud unsupported','האזנה לא נתמכת')}else{b.onclick=()=>readActive?stopReading():startReading()}tools.append(b);updateReadBtn()}
+}
+window.addEventListener('hashchange',stopReading);
+setInterval(renderIllumination,60000);
 
 init();
 // An installed worker can update while this tab still runs yesterday's bundle.
